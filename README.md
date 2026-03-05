@@ -179,7 +179,7 @@ The Python app exposes a REST endpoint:
 > Driver detected holding a **mobile phone** with 0.76 confidence. The Mobile bar peaks and the indicator highlights immediately.
 
 ### Mobile App — Driver Awake
-![Mobile Awake](screenshots/mobile_awake.png)
+[![Mobile Awake](screenshots/mobile_awake.png)](https://github.com/ematty246/DriverDrowsinessDetection/blob/main/screenshots/dashboard_awake.jpeg)
 > The React Native app showing driver status as **Awake**. The map marker is green, and the status panel shows per-class confidence scores polled from the Flask API. Location is near Pondicherry, India.
 
 ### Mobile App — Driver Drowsy
