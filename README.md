@@ -164,6 +164,30 @@ The Python app exposes a REST endpoint:
 
 ---
 
+## 📷 Screenshots
+
+### Desktop Dashboard — Awake Detection
+![Awake Detection](screenshots/dashboard_awake.png)
+> Driver detected as **Awake** with 0.11 confidence. The teal bar is highlighted in the chart and the bottom indicator panel updates in real time.
+
+### Desktop Dashboard — Drowsy Detection
+![Drowsy Detection](screenshots/dashboard_drowsy.png)
+> Driver detected as **Drowsy** with 0.60 confidence. The Drowsy indicator panel lights up in cyan to alert the system. After 3 continuous seconds above 0.5 confidence, a serial alert is triggered.
+
+### Desktop Dashboard — Mobile Phone Detection
+![Mobile Detection](screenshots/dashboard_mobile.png)
+> Driver detected holding a **mobile phone** with 0.76 confidence. The Mobile bar peaks and the indicator highlights immediately.
+
+### Mobile App — Driver Awake
+![Mobile Awake](screenshots/mobile_awake.png)
+> The React Native app showing driver status as **Awake**. The map marker is green, and the status panel shows per-class confidence scores polled from the Flask API. Location is near Pondicherry, India.
+
+### Mobile App — Driver Drowsy
+![Mobile Drowsy](screenshots/mobile_drowsy.png)
+> The React Native app detecting **Drowsy** status (Drowsy: 0.69). The status panel updates and the WhatsApp share button lets a guardian receive the driver's location and detection details instantly.
+
+---
+
 ## 📋 Requirements
 
 ### Python
