@@ -301,15 +301,15 @@ class DriverMonitoringApp:
             boxes = results[0].boxes
             
             for box in boxes:
-                class_id = int(box.cls.cpu().numpy())
-                confidence = float(box.conf.cpu().numpy())
-                xyxy = box.xyxy.cpu().numpy().astype(int)[0]  # [x1, y1, x2, y2]
+                class_id = int(box.cls.item())
+                confidence = float(box.conf.item())
+                x1, y1, x2, y2 = map(int, box.xyxy[0].tolist())
                 
-                if class_id in names:
-                    class_name = names[class_id]
-                    if class_name in current_detections:
+                
+                class_name = names[class_id]
+                if class_name in current_detections:
                         current_detections[class_name] = max(current_detections[class_name], confidence)
-                        new_boxes.append((class_name, confidence, xyxy))
+                        new_boxes.append((class_name, confidence, (x1, y1, x2, y2)))
         
         # ✅ Keep last boxes for 0.5 sec if nothing new
         if new_boxes:
