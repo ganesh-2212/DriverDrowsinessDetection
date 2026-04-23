@@ -1,120 +1,84 @@
-# 🚗 Driver Drowsiness Monitoring System
+# Driver Drowsiness Monitoring System
 
-A real-time driver monitoring system that uses computer vision (YOLOv8) to detect driver states such as drowsiness, yawning, phone usage, and drinking — with live alerts via serial communication and a companion mobile app for location tracking.
-
----
-
-## 📸 System Overview
-
-The system consists of two components:
-
-1. **Python Desktop App** — captures webcam feed, runs YOLO inference, displays a live dashboard, and sends alerts to a hardware device via serial (e.g., Arduino).
-2. **React Native Mobile App** — polls the Flask API for driver status, shows the driver's location on a map, and allows sharing status via WhatsApp.
+A real-time driver monitoring system that uses YOLOv8-based computer vision to detect unsafe driver behaviors such as drowsiness, yawning, mobile phone usage, and drinking. The system generates instant alerts via hardware communication and enables remote monitoring through a mobile application.
 
 ---
 
-## 🧠 Features
+## System Overview
 
-- **Real-time detection** of: Drowsy, Awake, Yawning, Mobile (phone use), Drinking
-- **YOLOv8-powered** bounding box detection with confidence scores
-- **Smoothed confidence scores** using exponential moving average
-- **Drowsiness alert**: triggers serial signal after 3 continuous seconds of drowsiness
-- **Live Tkinter dashboard** with animated bar chart and detection indicators
-- **Flask REST API** (`/detections`) exposing real-time detection status as JSON
-- **React Native mobile app** with map view, live status polling, and WhatsApp sharing
+The system consists of two integrated components:
+
+- A Python-based desktop application that captures webcam input, performs real-time detection, displays a live dashboard, and sends alerts through serial communication.
+- A mobile application developed using React Native that retrieves driver status from a backend API and displays location-based monitoring.
 
 ---
 
-## 🗂️ Project Structure
+## Features
 
-```
-driver_drowsiness/
-├── app/
-│   └── (tabs)/
-│       ├── _layout.tsx       # Tab navigator layout
-│       ├── index.tsx         # Main screen: map + driver status + WhatsApp share
-│       └── explore.tsx       # Explore tab with app info
-├── assets/images/            # App icons and splash screen
-├── components/               # Reusable UI components
-│   └── ui/
-│       ├── collapsible.tsx
-│       ├── icon-symbol.tsx
-│       └── icon-symbol.ios.tsx
-├── constants/theme.ts        # Colors and fonts
-├── hooks/                    # Custom React hooks
-├── scripts/reset-project.js  # Project reset utility
-├── app.json                  # Expo configuration
-├── package.json
-├── tsconfig.json
-└── README.md
-```
+- Real-time detection of driver states:
+  - Drowsy
+  - Awake
+  - Yawning
+  - Mobile phone usage
+  - Drinking
 
-> The Python desktop app (`main.py` or equivalent) lives outside the Expo project directory.
+- YOLOv8-based object detection with confidence scoring
+- Confidence smoothing using exponential moving average
+- Time-based drowsiness alert to reduce false positives
+- Real-time dashboard with visual indicators
+- REST API for live data access
+- Mobile-based monitoring with location tracking
 
 ---
 
-## 🛠️ Tech Stack
+## Technology Stack
 
-| Layer | Technology |
-|---|---|
-| Detection Model | YOLOv8 (Ultralytics) |
-| Desktop UI | Python, Tkinter, Matplotlib |
-| Video Capture | OpenCV |
-| Serial Communication | PySerial |
-| REST API | Flask |
-| Mobile App | React Native (Expo) |
-| Maps | `react-native-maps` |
-| Location | `expo-location` |
+- YOLOv8 for object detection
+- Python with OpenCV for video processing
+- Tkinter and Matplotlib for desktop interface
+- Flask for REST API
+- PySerial for hardware communication
+- React Native (Expo) for mobile application
+- Map and location libraries for tracking
 
 ---
 
-## ⚙️ Setup & Installation
+## Setup and Installation
 
-### Python Desktop App
+### Python Application
 
-**Requirements:** Python 3.8+
+Install dependencies:
 
-```bash
-pip install ultralytics opencv-python flask pyserial Pillow matplotlib
-```
+pip install ultralytics opencv-python flask pyserial Pillow matplotlib numpy
 
-**Run:**
+Run the application:
 
-```bash
 python main.py
-```
 
-> Make sure your YOLO model weights are at:
-> `runs/detect/merged_yolo8_drive3/weights/best.pt`
-
-> Update the serial port in `setup_serial()` if not using `COM14`.
+Ensure the trained model file is correctly configured and update the serial port if required.
 
 ---
 
-### React Native Mobile App
+### Mobile Application
 
-**Requirements:** Node.js 18+, Expo CLI
+Install dependencies:
 
-```bash
-cd driver_drowsiness
 npm install
-npx expo start
-```
 
-> Update the Flask server IP in `index.tsx`:
-> ```ts
-> const response = await fetch("http://<YOUR_IP>:5000/detections");
-> ```
+Start the application:
+
+npx expo start
+
+Update the API endpoint in the mobile code to match the backend server IP.
 
 ---
 
-## 📡 Flask API
+## API Endpoint
 
-The Python app exposes a REST endpoint:
+GET /detections
 
-**`GET /detections`**
+Sample response:
 
-```json
 {
   "status": "Drowsy",
   "detections": {
@@ -126,100 +90,38 @@ The Python app exposes a REST endpoint:
   },
   "timestamp": "05-03-2026 14:32:01"
 }
-```
-
-- `status` returns the highest-confidence label (or `"None"` if below 0.3 threshold).
-- The mobile app polls this endpoint every 5 seconds.
 
 ---
 
-## 📲 Mobile App Features
+## Alert Logic
 
-- **Map View** — shows current device location with a color-coded marker (🔴 Drowsy / 🟢 Safe)
-- **Status Panel** — displays driver state, timestamp, and per-class confidence scores
-- **WhatsApp Share** — sends a formatted message with driver status, detections, Google Maps link, and live API link
-
----
-
-## 🚨 Alert Logic
-
-| Condition | Action |
-|---|---|
-| Drowsy > 0.5 for ≥ 3 seconds | Sends `"Drowsy\n"` via serial (once per event) |
-| Other class > 0.3 | Sends class name via serial |
-| No strong detection | Sends `"None\n"` via serial |
+- Drowsiness above threshold for a continuous duration triggers a hardware alert
+- Other detected states send corresponding signals
+- No detection results in a default signal
 
 ---
 
-## 🔧 Configuration
+## Project Structure
 
-| Setting | Location | Default |
-|---|---|---|
-| Serial port | `setup_serial()` | `COM14` |
-| Baud rate | `setup_serial()` | `9600` |
-| YOLO model path | `setup_yolo()` | `runs/detect/merged_yolo8_drive3/weights/best.pt` |
-| Flask host/port | `run_flask()` | `0.0.0.0:5000` |
-| Flask API IP (mobile) | `index.tsx` | `192.168.224.188:5000` |
-| Drowsiness threshold | `send_serial_data()` | `0.5` confidence, `3.0` seconds |
-
----
-
-## 📷 Screenshots
-
-### Desktop Dashboard — Awake Detection
-![Awake Detection](screenshots/dashboard_awake.jpeg)
-> Driver detected as **Awake** with 0.11 confidence. The teal bar is highlighted in the chart and the bottom indicator panel updates in real time.
-
-### Desktop Dashboard — Drowsy Detection
-![Drowsy Detection](screenshots/dashboard_drowsy.jpeg)
-> Driver detected as **Drowsy** with 0.60 confidence. The Drowsy indicator panel lights up in cyan to alert the system. After 3 continuous seconds above 0.5 confidence, a serial alert is triggered.
-
-### Desktop Dashboard — Mobile Phone Detection
-![Mobile Detection](screenshots/dashboard_mobile.jpeg)
-> Driver detected holding a **mobile phone** with 0.76 confidence. The Mobile bar peaks and the indicator highlights immediately.
-
-### Mobile App — Driver Awake
-[![Mobile Awake](screenshots/mobile_awake.jpeg)
-> The React Native app showing driver status as **Awake**. The map marker is green, and the status panel shows per-class confidence scores polled from the Flask API. Location is near Pondicherry, India.
-
-### Mobile App — Driver Drowsy
-![Mobile Drowsy](screenshots/mobile_drowsy.jpeg)
-> The React Native app detecting **Drowsy** status (Drowsy: 0.69). The status panel updates and the WhatsApp share button lets a guardian receive the driver's location and detection details instantly.
+driver_drowsiness/
+├── app/
+│   └── (tabs)/
+│       ├── _layout.tsx
+│       ├── index.tsx
+│       └── explore.tsx
+├── assets/images/
+├── components/
+│   └── ui/
+├── constants/
+├── hooks/
+├── scripts/
+├── app.json
+├── package.json
+├── tsconfig.json
+└── README.md
 
 ---
 
-## 📋 Requirements
+## License
 
-### Python
-```
-ultralytics
-opencv-python
-flask
-pyserial
-Pillow
-matplotlib
-numpy
-```
-
-### React Native
-```
-expo
-expo-location
-expo-router
-react-native-maps
-```
-
----
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/your-feature`
-3. Commit your changes: `git commit -m 'Add your feature'`
-4. Push and open a Pull Request
-
----
-
-## 📄 License
-
-This project is for educational and research purposes.
+This project is intended for educational and research purposes.
